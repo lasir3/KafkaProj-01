@@ -3,11 +3,17 @@ package com.example.kafka;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
-public class SimpleProducer {
+
+public class SimpleProducerSync {
+    public static final Logger logger = LoggerFactory.getLogger(SimpleProducerSync.class.getName());
     public static void main(String[] args) {
         // KafkaProducer configuration setting
         // Todo : sending (null, "Hello world!")
@@ -30,11 +36,21 @@ public class SimpleProducer {
         ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topicName, "Hello world!");
 
         // KafkaProducer Message Send
-        for (int i = 0; i < 10; i++){
-            kafkaProducer.send(producerRecord);
+        try {
+            RecordMetadata recordMetadata = kafkaProducer.send(producerRecord).get();
+            logger.info("\n ###### record metadata received ##### \n" +
+                "partitions:" + recordMetadata.partition() + "\n" +
+                "offset:" + recordMetadata.offset() + "\n" +
+                "timestamp:" + recordMetadata.timestamp() + "\n" +
+                "topic:" + recordMetadata.topic());
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            kafkaProducer.close();
         }
-
-        kafkaProducer.flush();
-        kafkaProducer.close();
     }
 }

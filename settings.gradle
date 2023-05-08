@@ -1,2 +1,4 @@
 rootProject.name = 'KafkaProj-01'
+include 'producers'
 
+ 
