@@ -100,15 +100,20 @@ public class PizzaProducer {
         // key.serializer.class, value,serializer.class
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        props.setProperty(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, "50000");
 
         // Acks Property
-        props.setProperty(ProducerConfig.ACKS_CONFIG, "0");
+        // props.setProperty(ProducerConfig.ACKS_CONFIG, "0");
+
+        // batch Setting
+        // props.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "32000");
+        // props.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20");
 
         // KafkaProducer Object Creation
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(props);
 
         sendPizzaMessage(kafkaProducer, topicName,
-                -1, 1000, 0, 0, false);
+                -1, 1000, 0, 0, true);
 
         kafkaProducer.close();
     }
