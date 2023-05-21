@@ -121,7 +121,7 @@ public class PizzaProducerCustomPartitioner {
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(props);
 
         sendPizzaMessage(kafkaProducer, topicName,
-                -1, 100, 0, 0, false);
+                -1, 100, 0, 0, true);
 
         kafkaProducer.close();
     }
