@@ -9,18 +9,21 @@ import java.util.Locale;
 import java.util.Random;
 
 public class PizzaMessage {
+    // 생성자 선언
+    public PizzaMessage() {}
+
     // 피자 메뉴를 설정. getRandomValueFromList()에서 임의의 피자명을 출력하는 데 사용.
     private static final List<String> pizzaNames = List.of("Potato Pizza", "Cheese Pizza",
             "Cheese Garlic Pizza", "Super Supreme", "Peperoni");
-//    private static final List<String> pizzaNames = List.of("고구마 피자", "치즈 피자",
-//            "치즈 갈릭 피자", "슈퍼 슈프림", "페페로니 피자");
+    //    private static final List<String> pizzaNames = List.of("고구마 피자", "치즈 피자",
+    //            "치즈 갈릭 피자", "슈퍼 슈프림", "페페로니 피자");
 
     // 피자 가게명을 설정. getRandomValueFromList()에서 임의의 피자 가게명을 출력하는데 사용.
     private static final List<String> pizzaShop = List.of("A001", "B001", "C001",
             "D001", "E001", "F001", "G001", "H001", "I001", "J001", "K001", "L001", "M001", "N001",
             "O001", "P001", "Q001");
 
-    public PizzaMessage() {}
+
 
     //인자로 피자명 또는 피자가게 List와 Random 객체를 입력 받아서 random한 피자명 또는 피자 가게 명을 반환.
     private String getRandomValueFromList(List<String> list, Random random) {
@@ -46,8 +49,8 @@ public class PizzaMessage {
                 , now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.KOREAN)));
         //System.out.println(message);
         HashMap<String, String> messageMap = new HashMap<>();
-        messageMap.put("key", shopId);
-        messageMap.put("message", message);
+        messageMap.put("key", shopId); // Key
+        messageMap.put("value", message); // Value
 
         return messageMap;
     }
