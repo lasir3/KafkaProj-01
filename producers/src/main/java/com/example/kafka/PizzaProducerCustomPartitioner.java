@@ -5,7 +5,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +14,17 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
+
 public class PizzaProducerCustomPartitioner {
     public static final Logger logger = LoggerFactory.getLogger(PizzaProducerCustomPartitioner.class.getName());
 
-
     public static void sendPizzaMessage(KafkaProducer<String, String> kafkaProducer,
-                                        String topicName, int iterCount,
-                                        int interIntervalMillis, int intervalMillis,
-                                        int intervalCount, boolean sync) {
+                                        String topicName,
+                                        int iterCount, /* loop count */
+                                        int interIntervalMillis, /* Interval By Single Message */
+                                        int intervalMillis, /* Interval By Multi Messages*/
+                                        int intervalCount, /* Interval By Count */
+                                        boolean sync) {
 
         PizzaMessage pizzaMessage = new PizzaMessage();
         int iterSeq = 0;
@@ -30,18 +32,17 @@ public class PizzaProducerCustomPartitioner {
         Random random = new Random(seed);
         Faker faker = Faker.instance(random);
 
-        long startTime = System.currentTimeMillis();
-
         while( iterSeq++ != iterCount ) {
-            HashMap<String, String> pMessage = pizzaMessage.produce_msg(faker, random, iterSeq);
-            ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topicName,
-                    pMessage.get("key"), pMessage.get("message"));
-            sendMessage(kafkaProducer, producerRecord, pMessage, sync);
+            HashMap<String, String> messageMap = pizzaMessage.produce_msg(faker, random, iterSeq);
+            ProducerRecord<String, String> producerRecord =
+                    new ProducerRecord<String,String>(topicName, messageMap.get("key"), messageMap.get("value"));
 
+            sendMessage(kafkaProducer, producerRecord, messageMap, sync);
+            
             if((intervalCount > 0) && (iterSeq % intervalCount == 0)) {
                 try {
-                    logger.info("####### IntervalCount:" + intervalCount +
-                            " intervalMillis:" + intervalMillis + " #########");
+                    logger.info("##### IntervalCount : " + intervalCount + 
+                                " intervalMillis:" + intervalMillis + " #########");
                     Thread.sleep(intervalMillis);
                 } catch (InterruptedException e) {
                     logger.error(e.getMessage());
@@ -54,66 +55,74 @@ public class PizzaProducerCustomPartitioner {
                     Thread.sleep(interIntervalMillis);
                 } catch (InterruptedException e) {
                     logger.error(e.getMessage());
-                }
+                } 
             }
-
         }
-        long endTime = System.currentTimeMillis();
-        long timeElapsed = endTime - startTime;
-
-        logger.info("{} millisecond elapsed for {} iterations", timeElapsed, iterCount);
-
     }
 
-    public static void sendMessage(KafkaProducer<String, String> kafkaProducer,
-                                   ProducerRecord<String, String> producerRecord,
-                                   HashMap<String, String> pMessage, boolean sync) {
+    public static void sendMessage (KafkaProducer<String, String> kafkaProducer,
+                                    ProducerRecord<String, String> producerRecord,
+                                    HashMap<String, String> messageMap, boolean sync) {
         if(!sync) {
             kafkaProducer.send(producerRecord, (metadata, exception) -> {
-                if (exception == null) {
-                    logger.info("async message:" + pMessage.get("key") + " partition:" + metadata.partition() +
-                            " offset:" + metadata.offset());
+                if(exception == null) {
+                    logger.info("async message:" + messageMap.get("key") + " partitions:" + metadata.partition()
+                            + " offset:" + metadata.offset() + "\n");
                 } else {
-                    logger.error("exception error from broker " + exception.getMessage());
+                    logger.error("exception error from brocker " + exception.getMessage());
                 }
             });
         } else {
             try {
+                // Get Metadata if Sync
                 RecordMetadata metadata = kafkaProducer.send(producerRecord).get();
-                logger.info("sync message:" + pMessage.get("key") + " partition:" + metadata.partition() +
-                        " offset:" + metadata.offset());
-            } catch (ExecutionException e) {
-                logger.error(e.getMessage());
+                logger.info("sync message:" + messageMap.get("key") + " partitions:" + metadata.partition()
+                        + " offset:" + metadata.offset() + "\n");
             } catch (InterruptedException e) {
-                logger.error(e.getMessage());
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
         }
-
     }
 
     public static void main(String[] args) {
-
+        // KafkaProducer configuration setting
         String topicName = "pizza-topic-partitioner";
+        Properties props = new Properties();
 
-        //KafkaProducer configuration setting
-        // null, "hello world"
+        // bootstrap.servers Method 1 - direct statement
+        // props.setProperty("bootstrap.servers", "192.168.0.119:9092");
+        // bootstrap.servers Method 2 - Using ProducerConfig Class
+        props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.73:9092");
 
-        Properties props  = new Properties();
-        props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.56.101:9092");
+        // key.serializer.class, value,serializer.class
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.setProperty("specialKey", "P001");
-        // partitioner.class에 CustomPartitioner 클래스를 등록함
-        //props.setProperty("partitioner.class", "com.example.kafka.CustomPartitioner");
+
+        // Making Custom Property
+        props.setProperty("custom.specialKey", "P001");
+        // props.setProperty("partitioner.class", "CustomPartitioner"); or
         props.setProperty(ProducerConfig.PARTITIONER_CLASS_CONFIG, "com.example.kafka.CustomPartitioner");
 
-        //KafkaProducer object creation
+        // props.setProperty(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, "50000");
+        // props.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "6");
+        // props.setProperty(ProducerConfig.ACKS_CONFIG, "0");
+        // props.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
+
+        // Acks Property
+        // props.setProperty(ProducerConfig.ACKS_CONFIG, "0");
+
+        // batch Setting
+        // props.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "32000");
+        // props.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20");
+
+        // KafkaProducer Object Creation
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(props);
 
         sendPizzaMessage(kafkaProducer, topicName,
                 -1, 100, 0, 0, false);
 
         kafkaProducer.close();
-
     }
 }
