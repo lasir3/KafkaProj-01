@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +29,35 @@ public class ConsumerWakeup {
         KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(props);
         kafkaConsumer.subscribe(List.of(topicName));
 
-        while(true) {
-            ConsumerRecords<String,String> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(1000));
-            for (ConsumerRecord record : consumerRecords) {
-                logger.info("record key:{}, record value:{}, partition:{}",
-                        record.key(), record.value(), record.partition());
+        // main thread
+        Thread mainThread = Thread.currentThread();
+
+        // When Main() is closed, call Wakeup() Exception
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                logger.info("main program starts to exit by calling wakeup");
+                kafkaConsumer.wakeup();
+
+                try {
+                    // wait until main() is closed.
+                    mainThread.join();
+                } catch(InterruptedException e) { e.printStackTrace();}
             }
+        });
+
+        try {
+            while (true) {
+                ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(1000));
+                for (ConsumerRecord record : consumerRecords) {
+                    logger.info("record key:{}, record value:{}, partition:{}",
+                            record.key(), record.value(), record.partition());
+                }
+            }
+        }catch(WakeupException e) {
+            logger.error("wakeup exception has been called");
+        }finally {
+            logger.info("finally consumer is closing");
+            kafkaConsumer.close();
         }
 
         // kafkaConsumer.close();
