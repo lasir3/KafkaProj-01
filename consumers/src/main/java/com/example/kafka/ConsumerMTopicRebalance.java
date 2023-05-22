@@ -26,7 +26,9 @@ public class ConsumerMTopicRebalance {
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         // props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group_01");
         // props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group-01");
+        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group-assign");
+
+        // props.setProperty(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG);
 
         KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(props);
         kafkaConsumer.subscribe(List.of("topic-p3-t1", "topic-p3-t2"));
