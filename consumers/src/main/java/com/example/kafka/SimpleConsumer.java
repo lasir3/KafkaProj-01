@@ -26,9 +26,9 @@ public class SimpleConsumer {
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "simple-topic");
 
         // HeartBeat, poll property
-        props.setProperty(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "5000");
-        props.setProperty(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "90000");
-        props.setProperty(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "600000");
+        // eprops.setProperty(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "5000");
+        // eprops.setProperty(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "90000");
+        // eprops.setProperty(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "600000");
 
         KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(props);
         kafkaConsumer.subscribe(List.of(topicName));
