@@ -26,7 +26,7 @@ public class ConsumerMTopicRebalance {
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group-assign");
 
         // Round Robin Partition
-        props.setProperty(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, RoundRobinAssignor.class.getName());
+        props.setProperty(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, CooperativeStickyAssignor.class.getName());
 
         KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(props);
         kafkaConsumer.subscribe(List.of("topic-p3-t1", "topic-p3-t2"));
