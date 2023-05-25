@@ -43,7 +43,8 @@ public class ConsumerCommit {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 logger.info("main program starts to exit by calling wakeup");
-                kafkaConsumer.wakeup();
+                // No Use Wakeup Exception 
+                // kafkaConsumer.wakeup();
 
                 try {
                     // wait until main() is closed.
@@ -51,7 +52,6 @@ public class ConsumerCommit {
                 } catch(InterruptedException e) { e.printStackTrace();}
             }
         });
-
 
         // kafkaConsumer.close();
         pollAutoCommit(kafkaConsumer);
