@@ -24,7 +24,7 @@ public class FileProducer {
         // KafkaProducer Object Creation
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(props);
         // Producer 파일의 절대경로 지정
-        String filePath = "E:\\Kafka-Project\\KafkaProj-01\\parctice\\src\\main\\resources\\pizza_sample.txt";
+        String filePath = "E:\\Kafka-Project\\KafkaProj-01\\practice\\src\\main\\resources\\pizza_append.txt";
 
         // KafkaPrducer 객체생성 -> ProducerRecords 생성 -> send() 비동기 방식 전송
         sendFileMessages(kafkaProducer, topicName, filePath);
