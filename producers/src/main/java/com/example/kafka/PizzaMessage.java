@@ -44,8 +44,8 @@ public class PizzaMessage {
         String phoneNumber = faker.phoneNumber().phoneNumber();
         String address = faker.address().streetAddress();
         LocalDateTime now = LocalDateTime.now();
-        String message = String.format("order_id:%s, shop:%s, pizza_name:%s, customer_name:%s, phone_number:%s, address:%s, time:%s"
-                , ordId, shopId, pizzaName, customerName, phoneNumber, address
+        String message = String.format("order_id:%s, shop:%s, pizza_name:%s, customer_name:%s"
+                , ordId, shopId, pizzaName, customerName  /*, phoneNumber, address*/
                 , now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.KOREAN)));
         //System.out.println(message);
         HashMap<String, String> messageMap = new HashMap<>();
