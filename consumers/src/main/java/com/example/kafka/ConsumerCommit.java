@@ -24,7 +24,7 @@ public class ConsumerCommit {
         // props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group_01");
         // props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group-03");
-        props.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "5000");
+        // props.setProperty(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "5000");
         props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
 
         // poll Timeout property
