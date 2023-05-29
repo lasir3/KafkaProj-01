@@ -56,8 +56,31 @@ public class ConsumerPartitionAssignSeek {
 
         // kafkaConsumer.close();
         // pollAutoCommit(kafkaConsumer);
-        pollCommitSync(kafkaConsumer);
+        // pollCommitSync(kafkaConsumer);
         // pollCommitAsync(kafkaConsumer);
+        poolNoCommit(kafkaConsumer);
+    }
+
+    private static void poolNoCommit(KafkaConsumer<String, String> kafkaConsumer) {
+        int loopCnt = 0;
+
+        try {
+            while (true) {
+                ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(1000));
+                logger.info(" ######## loopCnt: {} consumerRecords count:{}", loopCnt++, consumerRecords.count());
+                for (ConsumerRecord record : consumerRecords) {
+                    logger.info("record key:{}, partition:{}, record offset:{}, record value:{}",
+                            record.key(), record.partition(), record.offset(), record.value());
+                }
+            }
+        }catch(WakeupException e) {
+            logger.error("wakeup exception has been called");
+        } catch(Exception e) {
+            logger.error(e.getMessage());
+        }finally {
+            logger.info("finally consumer is closing");
+            kafkaConsumer.close();
+        }
     }
 
     private static void pollCommitAsync(KafkaConsumer<String, String> kafkaConsumer) {
