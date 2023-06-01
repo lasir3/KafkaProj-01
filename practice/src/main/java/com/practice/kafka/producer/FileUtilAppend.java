@@ -39,7 +39,7 @@ public class FileUtilAppend {
         String shopId = getRandomValueFromList(pizzaShop, random);
         String pizzaName = getRandomValueFromList(pizzaNames, random);
 
-        String ordId = "ord"+id;
+        int ordId = id;
         String customerName = faker.name().fullName();
         String phoneNumber = faker.phoneNumber().phoneNumber();
         String address = faker.address().streetAddress();
@@ -92,7 +92,7 @@ public class FileUtilAppend {
             System.out.println("###### iteration:"+i+" file write is done");
             try {
                 //주어진 기간동안 sleep
-                Thread.sleep(1000);
+                Thread.sleep(100);
             }catch(InterruptedException e) {
                 e.printStackTrace();
             }
