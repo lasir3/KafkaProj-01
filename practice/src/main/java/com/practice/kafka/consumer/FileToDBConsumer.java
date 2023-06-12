@@ -173,9 +173,9 @@ public class FileToDBConsumer<K extends Serializable, V extends Serializable> {
         FileToDBConsumer<String, String> fileToDBConsumer = new
                 FileToDBConsumer<String, String>(props, List.of(topicName), orderDBHandler);
         fileToDBConsumer.initConsumer();
-        String commitMode = "sync";
+        String commitMode = "async";
 
-        fileToDBConsumer.pollConsumes(5000, commitMode);
+        fileToDBConsumer.pollConsumes(1000, commitMode);
 
     }
 

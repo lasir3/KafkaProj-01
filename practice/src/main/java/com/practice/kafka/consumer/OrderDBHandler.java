@@ -54,14 +54,10 @@ public class OrderDBHandler {
                 pstmt.setString(5, orderDTO.phoneNumber);
                 pstmt.setString(6, orderDTO.address);
                 pstmt.setTimestamp(7, Timestamp.valueOf(orderDTO.orderTime));
+                // DTO 객체의 내용을 Batch
                 pstmt.addBatch();
             }
-            pstmt.executeUpdate();
-            //커밋
-//            connection.commit();
-            //Batch 초기화
-            //pstmt.clearBatch();
-
+            pstmt.executeBatch();
         } catch(SQLException e) {
             logger.info(e.getMessage());
         }
