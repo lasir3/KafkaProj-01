@@ -89,14 +89,14 @@ public class PizzaProducer {
 
     public static void main(String[] args) {
         // KafkaProducer configuration setting
-        String topicName = "pizza-topic";
+        String topicName = "pizza-topic-p3r3";
         Properties props = new Properties();
 
         // bootstrap.servers Method 1 - direct statement
         // props.setProperty("bootstrap.servers", "192.168.0.119:9092");
 
         // bootstrap.servers Method 2 - Using ProducerConfig Class
-        props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.73:9092");
+        props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.73:9092, 192.168.0.73:9093, 192.168.0.73:9094");
         // key.serializer.class, value,serializer.class
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -118,7 +118,7 @@ public class PizzaProducer {
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(props);
 
         sendPizzaMessage(kafkaProducer, topicName,
-                -1, 1000, 0, 0, true);
+                -1, 100, 0, 0, false);
 
         kafkaProducer.close();
     }
