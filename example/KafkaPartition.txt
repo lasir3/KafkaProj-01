@@ -1,0 +1,145 @@
+## 예제
+
+### Range의 경우
+
+1. 기본값인 RangeAssignor을 사용하여 한개의 ConsumerMTopicRebalance Consumer를 실행한다.
+    
+    ### Console Log에서 RangeAssignor를 사용함을 확인할 수 있다.
+    partition.assignment.strategy = [class org.apache.kafka.clients.consumer.RangeAssignor, class org.apache.kafka.clients.consumer.CooperativeStickyAssignor]
+    
+    ubuntu@kafka-test:~$ kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group group-assign
+    
+    GROUP           TOPIC           PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                  HOST            CLIENT-ID
+    group-assign    topic-p3-t2     1          0               0               0               consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t1     1          2               2               0               consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t2     2          4               4               0               consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t2     0          3               3               0               consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t1     2          2               2               0               consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t1     0          3               3               0               consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19 /192.168.0.57   consumer-group-assign-1
+    
+
+2. ConsumerMTopicRebalance Consumer를 한개 더 띄운 후 변화를 확인한다.
+    
+    ### 한개의 Consumer가 추가되는 순간 기존의 연결된 Topic들을 Revoke한다.
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Revoke previously assigned partitions topic-p3-t2-1, topic-p3-t1-0, topic-p3-t2-0, topic-p3-t1-2, topic-p3-t2-2, topic-p3-t1-1
+    
+    ### 이후 다시 Join을 하면서 각각 4개, 2개의 Partition을 할당받게됨.
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] (Re-)joining group
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Successfully joined group with generation Generation{generationId=2, memberId='consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19', protocol='range'}
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Finished assignment for group at generation 2: {consumer-group-assign-1-166454d3-d55f-432a-9e51-cf39d5e395f8=Assignment(partitions=[topic-p3-t2-0, topic-p3-t2-1, topic-p3-t1-0, topic-p3-t1-1]), consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19=Assignment(partitions=[topic-p3-t2-2, topic-p3-t1-2])}
+    
+    ### 이때 Consumer-ID를 확인해보면 Topic의 Partition 할당은 Consumer 양쪽에 같은 파티션이 붙도록 Rebalance 됨을 확인할 수 있다. 
+    ### (Consumer1 -> t1-0, t2-0, t1-1, t2-1 / Consumer2 -> t1-2, t2-2
+    ubuntu@kafka-test:~$ kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group group-assign
+    
+    GROUP           TOPIC           PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                  HOST            CLIENT-ID
+    group-assign    topic-p3-t1     0          3               3               0               consumer-group-assign-1-166454d3-d55f-432a-9e51-cf39d5e395f8 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t2     0          3               3               0               consumer-group-assign-1-166454d3-d55f-432a-9e51-cf39d5e395f8 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t2     1          0               0               0               consumer-group-assign-1-166454d3-d55f-432a-9e51-cf39d5e395f8 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t1     1          2               2               0               consumer-group-assign-1-166454d3-d55f-432a-9e51-cf39d5e395f8 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t1     2          2               2               0               consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19 /192.168.0.57   consumer-group-assign-1   
+    group-assign    topic-p3-t2     2          4               4               0               consumer-group-assign-1-ddeb8bb0-c43d-42e1-bc24-d0855f984a19 /192.168.0.57   consumer-group-assign-1
+    
+
+### Round Robin의 경우
+
+1. RoundRobinAssignor을 사용하여 한개의 ConsumerMTopicRebalance Consumer를 실행한다.
+    - props.setProperty(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, RoundRobinAssignor.class.getName());
+    
+    ### Console Log에서 RoundRobinAssignor를 사용함을 확인할 수 있다.
+    partition.assignment.strategy = [org.apache.kafka.clients.consumer.RoundRobinAssignor]
+    
+    ubuntu@kafka-test:~$ kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group group-assign
+    
+    GROUP           TOPIC           PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                  HOST            CLIENT-ID
+    group-assign    topic-p3-t2     1          0               0               0               consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t1     1          2               2               0               consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t2     2          4               4               0               consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t2     0          3               3               0               consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t1     2          2               2               0               consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t1     0          3               3               0               consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c /192.168.0.57   consumer-group-assign-1
+    
+
+2. ConsumerMTopicRebalance Consumer를 한개 더 띄운 후 변화를 확인한다.
+    
+
+    ### Range와 마찬가지로 모든 Partition의 연결을 끊고 다시 분배한다. 이때 Range와는 다르게 순차적으로 각 Consumer에 할당하기 때문에 Consumer는 같은 숫자의 Partition을 분배받는다.
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Revoke previously assigned partitions topic-p3-t1-0, topic-p3-t2-1, topic-p3-t2-0, topic-p3-t1-2, topic-p3-t1-1, topic-p3-t2-2
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] (Re-)joining group
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Successfully joined group with generation Generation{generationId=10, memberId='consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c', protocol='roundrobin'}
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Finished assignment for group at generation 10: {consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0=Assignment(partitions=[topic-p3-t1-1, topic-p3-t2-0, topic-p3-t2-2]), consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c=Assignment(partitions=[topic-p3-t1-0, topic-p3-t1-2, topic-p3-t2-1])}
+    
+    ### Range와는 다르게 각 Partition의 번호가 두 Consumer 사이에 같이 않음을 확인할 수 있다.
+    ### Consumer1 -> t1-1, t2-0, t2-2 / Consumer2 -> t1-0, t2-1, t1-2
+    ubuntu@kafka-test:~$ kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group group-assign
+    
+    GROUP           TOPIC           PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                 
+                                     HOST            CLIENT-ID
+    group-assign    topic-p3-t2     0          3               3               0               consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0 /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t1     1          2               2               0               consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0 /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t2     2          4               4               0               consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0 /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t1     0          3               3               0               consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t2     1          0               0               0               consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t1     2          2               2               0               consumer-group-assign-1-4c58e5f5-54da-4802-b2a1-ad3dd45a789c /192.168.0.57   consumer-group-assign-1
+
+    
+
+### CooperativeSticky의 경우
+
+1. RoundRobinAssignor을 사용하여 한개의 ConsumerMTopicRebalance Consumer를 실행한다.
+    - props.setProperty(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, CooperativeStickyAssignor.class.getName());
+    
+    ### Console Log에서 CooperativeStickyAssignor를 사용함을 확인할 수 있다.
+    partition.assignment.strategy = [org.apache.kafka.clients.consumer.CooperativeStickyAssignor]
+    
+    ### 최초에 RoundRobin과 같은 방식으로 할당된다. 
+    ubuntu@kafka-test:~$ kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group group-assign
+    
+    GROUP           TOPIC           PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                  HOST            CLIENT-ID
+    group-assign    topic-p3-t2     1          0               0               0               consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0 /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t1     1          2               2               0               consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0 /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t2     2          4               4               0               consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0 /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t2     0          3               3               0               consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0 /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t1     2          2               2               0               consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0 /192.168.0.57   consumer-group-assign-1
+    group-assign    topic-p3-t1     0          3               3               0               consumer-group-assign-1-efe661b8-51bd-4476-aba5-4203f6a19cf0 /192.168.0.57   consumer-group-assign-1
+    
+    ### CooperativeStickyAssignor의 경우 별개의 Partition Log가 나타남.
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Updating assignment with
+    	Assigned partitions:                       [topic-p3-t1-0, topic-p3-t2-1, topic-p3-t2-0, topic-p3-t1-2, topic-p3-t1-1, topic-p3-t2-2]
+    	Current owned partitions:                  []
+    	Added partitions (assigned - owned):       [topic-p3-t1-0, topic-p3-t2-1, topic-p3-t2-0, topic-p3-t1-2, topic-p3-t1-1, topic-p3-t2-2]
+    	Revoked partitions (owned - assigned):     []
+
+    
+
+2. ConsumerMTopicRebalance Consumer를 한개 더 띄운 후 변화를 확인한다.
+    
+    ### 전체를 Revoke 하지 않고 새로이 assign 할 Partition만 revoke를 진행한다.
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Request joining group due to: group is already rebalancing
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] (Re-)joining group
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Successfully joined group with generation Generation{generationId=18, memberId='consumer-group-assign-1-d2af5728-9a57-47c6-94e0-4b18501a864b', protocol='cooperative-sticky'}
+    [main] INFO org.apache.kafka.clients.consumer.internals.AbstractStickyAssignor - Final assignment of partitions to consumers: 
+    {consumer-group-assign-1-d2af5728-9a57-47c6-94e0-4b18501a864b=[topic-p3-t1-0, topic-p3-t1-1, topic-p3-t1-2], consumer-group-assign-1-cbea29d4-ed59-4360-85e6-b2127b99f37d=[topic-p3-t2-0, topic-p3-t2-1, topic-p3-t2-2]}
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Finished assignment for group at generation 18: {consumer-group-assign-1-d2af5728-9a57-47c6-94e0-4b18501a864b=Assignment(partitions=[topic-p3-t1-0, topic-p3-t1-1, topic-p3-t1-2]), consumer-group-assign-1-cbea29d4-ed59-4360-85e6-b2127b99f37d=Assignment(partitions=[])}
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Successfully synced group in generation Generation{generationId=18, memberId='consumer-group-assign-1-d2af5728-9a57-47c6-94e0-4b18501a864b', protocol='cooperative-sticky'}
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Updating assignment with
+    	Assigned partitions:                       [topic-p3-t1-0, topic-p3-t1-2, topic-p3-t1-1]
+    	Current owned partitions:                  [topic-p3-t1-0, topic-p3-t2-1, topic-p3-t2-0, topic-p3-t1-2, topic-p3-t1-1, topic-p3-t2-2]
+    	Added partitions (assigned - owned):       []
+    	Revoked partitions (owned - assigned):     [topic-p3-t2-1, topic-p3-t2-0, topic-p3-t2-2]
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Revoke previously assigned partitions topic-p3-t2-1, topic-p3-t2-0, topic-p3-t2-2
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Request joining group due to: need to revoke partitions [topic-p3-t2-1, topic-p3-t2-0, topic-p3-t2-2] as indicated by the current assignment and re-join
+    ...
+    ...
+    ...
+    
+    ### Revoke된 Partition은 Consumer2로 이동한다. 새로 붙은 Partition에 대해서만 Rebalance를 진행함.
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Request joining group due to: group is already rebalancing
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] (Re-)joining group
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Successfully joined group with generation Generation{generationId=19, memberId='consumer-group-assign-1-cbea29d4-ed59-4360-85e6-b2127b99f37d', protocol='cooperative-sticky'}
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Successfully synced group in generation Generation{generationId=19, memberId='consumer-group-assign-1-cbea29d4-ed59-4360-85e6-b2127b99f37d', protocol='cooperative-sticky'}
+    [main] INFO org.apache.kafka.clients.consumer.internals.ConsumerCoordinator - [Consumer clientId=consumer-group-assign-1, groupId=group-assign] Updating assignment with
+    	Assigned partitions:                       [topic-p3-t2-1, topic-p3-t2-0, topic-p3-t2-2]
+    	Current owned partitions:                  []
+    	Added partitions (assigned - owned):       [topic-p3-t2-1, topic-p3-t2-0, topic-p3-t2-2]
+    	Revoked partitions (owned - assigned):
