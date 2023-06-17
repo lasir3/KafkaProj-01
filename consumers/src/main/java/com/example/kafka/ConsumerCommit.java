@@ -17,10 +17,10 @@ public class ConsumerCommit {
 
     public static void main(String[] args) {
 
-        String topicName = "pizza-topic";
+        String topicName = "pizza-topic-p3r3";
 
         Properties props = new Properties();
-        props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.73:9092");
+        props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.73:9092, 192.168.0.73:9093, 192.168.0.73:9094");
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         // props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group_01");

@@ -1,4 +1,4 @@
-package com.example.kafka;
+package com.practice.kafka.self;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -12,8 +12,8 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 
-public class SimpleProducerSync {
-    public static final Logger logger = LoggerFactory.getLogger(SimpleProducerSync.class.getName());
+public class SimpleProducerSyncWithAcks {
+    public static final Logger logger = LoggerFactory.getLogger(SimpleProducerSyncWithAcks.class.getName());
     public static void main(String[] args) {
         // KafkaProducer configuration setting
         // Todo : sending (null, "Hello world!")
@@ -28,29 +28,37 @@ public class SimpleProducerSync {
         // key.serializer.class, value,serializer.class
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-
+        //props.setProperty(ProducerConfig.ACKS_CONFIG, "0");
         // KafkaProducer Object Creation
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(props);
 
         // ProducerRecord Object Creation
         ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topicName, "Hello world!");
-
+        long beforeTime = System.currentTimeMillis(); //코드 실행 전에 시간 받아오기
         // KafkaProducer Message Send
-        try {
-            RecordMetadata recordMetadata = kafkaProducer.send(producerRecord).get();
-            logger.info("\n ###### record metadata received ##### \n" +
-                "partitions:" + recordMetadata.partition() + "\n" +
-                "offset:" + recordMetadata.offset() + "\n" +
-                "timestamp:" + recordMetadata.timestamp() + "\n" +
-                "topic:" + recordMetadata.topic());
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            kafkaProducer.close();
+        int i = 0;
+        while (i++ < 5000) {
+            try {
+                kafkaProducer.send(producerRecord);
+                // logger.info("\n ###### record metadata received ##### \n" +
+                //         "partitions:" + recordMetadata.partition() + "\n" +
+                //         "offset:" + recordMetadata.offset() + "\n" +
+                //         "timestamp:" + recordMetadata.timestamp() + "\n" +
+                //         "topic:" + recordMetadata.topic());
+                System.out.println(i);
+
+           // } catch (ExecutionException e) {
+           //     throw new RuntimeException(e);
+           // } catch (InterruptedException e) {
+           //     throw new RuntimeException(e);
+            } finally {
+                //kafkaProducer.close();
+            }
         }
+        System.out.println("While 종료");
+        long afterTime = System.currentTimeMillis(); // 코드 실행 후에 시간 받아오기
+        long secDiffTime = (afterTime - beforeTime)/1000; //두 시간에 차 계산
+        System.out.println("시간차이(m) : "+secDiffTime);
     }
 }
+

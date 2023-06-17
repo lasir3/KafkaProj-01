@@ -16,13 +16,11 @@ import java.util.Map;
 public class CustomPartitioner implements Partitioner {
     public static final Logger logger = LoggerFactory.getLogger(CustomPartitioner.class.getName());
     private final StickyPartitionCache stickyPartitionCache = new StickyPartitionCache();
-
     private String specialKeyName;
     @Override
     public void configure(Map<String, ?> configs) {
         specialKeyName = configs.get("custom.specialKey").toString();
     }
-
     @Override
     public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes, Cluster cluster) {
         // Get Partitions Info as List
@@ -30,15 +28,13 @@ public class CustomPartitioner implements Partitioner {
         // Number of Partitions
         int numPartitions = partitionInfoList.size();
         int numSpecialPartitions = (int)(numPartitions * 0.5); // 5 * 0.5 = 2.5 -> (int) 2
-        int partitionIndex = 0;
-
+        int partitionIndex;
         // Handle Exception
         if (keyBytes == null) {
             // return stickyPartitionCache.partition(topic, cluster);
             // or
             throw new InvalidRecordException("key should not be null");
         }
-
         if (((String)key).equals(specialKeyName) ) {
             // Custom from DefaultPartitioner
             partitionIndex = Utils.toPositive(Utils.murmur2(valueBytes)) % numSpecialPartitions; // 0, 1
@@ -48,13 +44,10 @@ public class CustomPartitioner implements Partitioner {
                     % (numPartitions - numSpecialPartitions) + numSpecialPartitions; // 2, 3, 4
         }
         logger.info("key:{} is sent to partition:{}", key.toString(), partitionIndex);
-
         return partitionIndex;
     }
-
     @Override
     public void close() {
 
     }
-
 }

@@ -1,7 +1,6 @@
 package com.practice.kafka.consumer;
 
 import java.sql.*;
-import javax.sql.*;
 
 public class JdbcSample
 {
@@ -38,7 +37,7 @@ public class JdbcSample
 
     public static void main(String[] args) throws SQLException
     {
-        Connection con = createConnectionByDriverManager("sys", "gliese");
+        Connection con = createConnectionByDriverManager("edk2613", "edk2613");
         Statement stmt = con.createStatement();
         stmt.execute("CREATE TABLE SAMPLE_TABLE ( ID INTEGER, NAME CHAR(20) )");
         PreparedStatement pstmt = con.prepareStatement("INSERT INTO SAMPLE_TABLE VALUES (?, ?)");
@@ -57,7 +56,7 @@ public class JdbcSample
         stmt.close();
         pstmt.close();
         con.close();
-        Connection con2 = createConnectionByDataSource("SYS", "gliese");
+        Connection con2 = createConnectionByDataSource("edk2613", "edk2613");
         Statement stmt2 = con2.createStatement();
         stmt2.execute("DROP TABLE SAMPLE_TABLE");
         stmt2.close();
