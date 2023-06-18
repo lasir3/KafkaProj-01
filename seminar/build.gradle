@@ -24,7 +24,6 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.15.2'
     // GOLDILOCKS JDBC Library
     implementation files ("C:\\Program Files\\GOLDILOCKS 21.1.17\\goldilocks_home\\lib\\goldilocks8.jar")
-    implementation project(path: ':practice')
 }
 
 test {

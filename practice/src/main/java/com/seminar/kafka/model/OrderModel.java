@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 public class OrderModel implements Serializable {
-    //ord5000, P001, Cheese Pizza, Erick Koelpin, (235) 592-3785 x9190, 6373 Gulgowski Path, 2023-05-31 17:46:07
+    //P001,ord5000, P001, Cheese Pizza, Erick Koelpin, (235) 592-3785 x9190, 6373 Gulgowski Path, 2023-05-31 17:46:07
     public String orderId;
     public String shopId;
     public String menuName;

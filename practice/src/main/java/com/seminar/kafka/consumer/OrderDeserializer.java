@@ -3,14 +3,14 @@ package com.seminar.kafka.consumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.seminar.kafka.model.OrderModel;
+import com.seminar.kafka.producer.FileProducer;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 
 public class OrderDeserializer implements Deserializer<OrderModel> {
-    public static final Logger logger = LoggerFactory.getLogger(OrderDeserializer.class.getName());
+    public static final Logger logger = LoggerFactory.getLogger(FileProducer.class.getName());
     ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Override
