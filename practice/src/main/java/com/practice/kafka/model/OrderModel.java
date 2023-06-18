@@ -1,4 +1,4 @@
-package com.seminar.kafka.model;
+package com.practice.kafka.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

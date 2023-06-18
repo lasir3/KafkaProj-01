@@ -1,7 +1,6 @@
 package com.seminar.kafka.event;
 
 import com.seminar.kafka.model.OrderModel;
-import org.apache.kafka.clients.producer.KafkaProducer;
 
 public class MessageEvent {
 

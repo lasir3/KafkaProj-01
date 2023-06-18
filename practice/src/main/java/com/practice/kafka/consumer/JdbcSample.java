@@ -1,4 +1,4 @@
-package com.seminar.kafka.consumer;
+package com.practice.kafka.consumer;
 
 import java.sql.*;
 

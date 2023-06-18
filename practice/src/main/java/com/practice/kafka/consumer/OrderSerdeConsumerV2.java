@@ -1,4 +1,4 @@
-package com.seminar.kafka.consumer;
+package com.practice.kafka.consumer;
 
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.errors.WakeupException;
@@ -113,7 +113,7 @@ public class OrderSerdeConsumerV2<String extends Serializable, OrderModel extend
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "order-serde-group");
         props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
 
-        OrderSerdeConsumerV2<java.lang.String, com.seminar.kafka.model.OrderModel> baseConsumer = new OrderSerdeConsumerV2<java.lang.String, com.seminar.kafka.model.OrderModel>(props, List.of(topicName));
+        OrderSerdeConsumerV2<java.lang.String, com.practice.kafka.model.OrderModel> baseConsumer = new OrderSerdeConsumerV2<java.lang.String, com.practice.kafka.model.OrderModel>(props, List.of(topicName));
         baseConsumer.initConsumer();
         java.lang.String commitMode = "async";
 

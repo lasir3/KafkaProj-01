@@ -1,4 +1,4 @@
-package com.seminar.kafka.self;
+package com.practice.kafka.self;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;

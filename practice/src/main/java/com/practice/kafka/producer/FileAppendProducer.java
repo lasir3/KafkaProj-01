@@ -1,8 +1,8 @@
-package com.seminar.kafka.producer;
+package com.practice.kafka.producer;
 
-import com.seminar.kafka.event.EventHandler;
-import com.seminar.kafka.event.FileEventHandler;
-import com.seminar.kafka.event.FileEventSource;
+import com.practice.kafka.event.EventHandler;
+import com.practice.kafka.event.FileEventHandler;
+import com.practice.kafka.event.FileEventSource;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

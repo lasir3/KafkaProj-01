@@ -1,4 +1,4 @@
-package com.seminar.kafka.event;
+package com.practice.kafka.event;
 
 public class MessageEvent {
 

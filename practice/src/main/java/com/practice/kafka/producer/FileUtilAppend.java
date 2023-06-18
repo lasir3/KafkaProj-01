@@ -1,4 +1,4 @@
-package com.seminar.kafka.producer;
+package com.practice.kafka.producer;
 
 import com.github.javafaker.Faker;
 

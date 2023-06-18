@@ -1,6 +1,6 @@
-package com.seminar.kafka.producer;
+package com.practice.kafka.producer;
 
-import com.seminar.kafka.model.OrderModel;
+import com.practice.kafka.model.OrderModel;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;

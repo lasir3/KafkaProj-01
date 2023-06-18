@@ -1,9 +1,9 @@
-package com.seminar.kafka.consumer;
+package com.practice.kafka.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.seminar.kafka.model.OrderModel;
-import com.seminar.kafka.producer.FileProducer;
+import com.practice.kafka.model.OrderModel;
+import com.practice.kafka.producer.FileProducer;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

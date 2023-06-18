@@ -1,4 +1,4 @@
-package com.seminar.kafka.consumer;
+package com.practice.kafka.consumer;
 
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.errors.WakeupException;

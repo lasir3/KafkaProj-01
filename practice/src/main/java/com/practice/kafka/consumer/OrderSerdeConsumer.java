@@ -1,6 +1,6 @@
-package com.seminar.kafka.consumer;
+package com.practice.kafka.consumer;
 
-import com.seminar.kafka.model.OrderModel;
+import com.practice.kafka.model.OrderModel;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
