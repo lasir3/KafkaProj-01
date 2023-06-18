@@ -1,6 +1,8 @@
 package com.seminar.kafka.consumer;
 
-import com.seminar.kafka.consumer.OrderDeserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.seminar.kafka.model.OrderModel;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -15,23 +17,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-public class OrderSerdeConsumer<String extends Serializable, OrderModel extends Serializable> {
+public class OrderSerdeConsumer<K extends Serializable, V extends Serializable> {
     public static final Logger logger = LoggerFactory.getLogger(OrderSerdeConsumer.class.getName());
+    protected KafkaConsumer<K, V> kafkaConsumer;
+    protected List<String> topics;
 
-    private KafkaConsumer<String, OrderModel> kafkaConsumer;
-    private List<java.lang.String> topics;
-
-    public OrderSerdeConsumer(Properties consumerProps, List<java.lang.String> topics) {
-        this.kafkaConsumer = new KafkaConsumer<String, OrderModel>(consumerProps);
+    private OrderDBHandler orderDBHandler;
+    public OrderSerdeConsumer(Properties consumerProps, List<String> topics,
+                            OrderDBHandler orderDBHandler) {
+        this.kafkaConsumer = new KafkaConsumer<K, V>(consumerProps);
         this.topics = topics;
+        this.orderDBHandler = orderDBHandler;
     }
-
     public void initConsumer() {
         this.kafkaConsumer.subscribe(this.topics);
         shutdownHookToRuntime(this.kafkaConsumer);
     }
 
-    private void shutdownHookToRuntime(KafkaConsumer<String, OrderModel> kafkaConsumer) {
+    private void shutdownHookToRuntime(KafkaConsumer<K, V> kafkaConsumer) {
         //main thread
         Thread mainThread = Thread.currentThread();
 
@@ -40,7 +43,6 @@ public class OrderSerdeConsumer<String extends Serializable, OrderModel extends 
             public void run() {
                 logger.info(" main program starts to exit by calling wakeup");
                 kafkaConsumer.wakeup();
-
                 try {
                     mainThread.join();
                 } catch(InterruptedException e) { e.printStackTrace();}
@@ -49,43 +51,113 @@ public class OrderSerdeConsumer<String extends Serializable, OrderModel extends 
 
     }
 
-    private OrderDTO makeOrderDTO(ConsumerRecord<String, OrderModel> record) throws Exception {
-        java.lang.String messageValue = (java.lang.String)record.value();
+    private void processRecord(ConsumerRecord<K, V> record) throws Exception {
+        OrderDTO orderDTO = makeOrderDTO(record);
+        orderDBHandler.insertOrder(orderDTO);
+    }
+
+    private OrderDTO makeOrderDTO(ConsumerRecord<K,V> record) throws Exception {
+        String messageValue = (String)record.value();
         logger.info("###### messageValue:" + messageValue);
-        java.lang.String[] tokens = messageValue.split(",");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        OrderDTO orderDTO = new OrderDTO(tokens[0], tokens[1], tokens[2], tokens[3],
-                tokens[4], tokens[5], LocalDateTime.parse(tokens[6].trim(), formatter));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode rootNode = objectMapper.readValue(messageValue, ObjectNode.class);
+
+        // JSONArray 형식으로 저장된 orderTime을 LocalDateTime 객체로 변환
+        int[] orderTimeArray = objectMapper.convertValue(rootNode.get("orderTime"), int[].class);
+        LocalDateTime orderTime;
+        if (orderTimeArray.length == 6) {
+            orderTime = LocalDateTime.of(orderTimeArray[0], orderTimeArray[1], orderTimeArray[2], orderTimeArray[3], orderTimeArray[4], orderTimeArray[5]);
+        } else if (orderTimeArray.length == 5) {
+            orderTime = LocalDateTime.of(orderTimeArray[0], orderTimeArray[1], orderTimeArray[2], orderTimeArray[3], orderTimeArray[4], 0);
+        } else {
+            throw new Exception("Invalid orderTime array length");
+        }
+
+        OrderDTO orderDTO = new OrderDTO(
+                rootNode.get("orderId").asText(),
+                rootNode.get("shopId").asText(),
+                rootNode.get("menuName").asText(),
+                rootNode.get("userName").asText(),
+                rootNode.get("phoneNumber").asText(),
+                rootNode.get("address").asText(),
+                orderTime);
 
         return orderDTO;
     }
 
-    private void processRecord(ConsumerRecord<String, OrderModel> record) {
-        logger.info("record key:{},  partition:{}, record offset:{} record value:{}",
-                record.key(), record.partition(), record.offset(), record.value());
+
+    private void processRecords(ConsumerRecords<K, V> records) throws Exception{
+        List<OrderDTO> orders = makeOrders(records);
+        orderDBHandler.insertOrders(orders);
     }
 
-    private void processRecords(ConsumerRecords<String, OrderModel> records) {
-        records.forEach(record -> processRecord(record));
-    }
-
-    private List<OrderDTO> makeOrders(ConsumerRecords<String, OrderModel> records) throws Exception {
+    private List<OrderDTO> makeOrders(ConsumerRecords<K,V> records) throws Exception {
         List<OrderDTO> orders = new ArrayList<>();
         //records.forEach(record -> orders.add(makeOrderDTO(record)));
-        for(ConsumerRecord<String, OrderModel> record : records) {
+        for(ConsumerRecord<K, V> record : records) {
             OrderDTO orderDTO = makeOrderDTO(record);
             orders.add(orderDTO);
         }
         return orders;
     }
 
-    public void pollConsumes(long durationMillis, java.lang.String commitMode) {
+
+    public void pollConsumes(long durationMillis, String commitMode) {
+        if (commitMode.equals("sync")) {
+            pollCommitSync(durationMillis);
+        } else {
+            pollCommitAsync(durationMillis);
+        }
+    }
+    private void pollCommitAsync(long durationMillis) {
         try {
             while (true) {
-                if (commitMode.equals("sync")) {
-                    pollCommitSync(durationMillis);
-                } else {
-                    pollCommitAsync(durationMillis);
+                ConsumerRecords<K, V> consumerRecords = this.kafkaConsumer.poll(Duration.ofMillis(durationMillis));
+                logger.info("consumerRecords count:" + consumerRecords.count());
+                if(consumerRecords.count() > 0) {
+                    try {
+                        processRecords(consumerRecords);
+                    } catch(Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                }
+//                if(consumerRecords.count() > 0) {
+//                    for (ConsumerRecord<K, V> consumerRecord : consumerRecords) {
+//                        processRecord(consumerRecord);
+//                    }
+//                }
+                //commitAsync의 OffsetCommitCallback을 lambda 형식으로 변경
+                this.kafkaConsumer.commitAsync((offsets, exception) -> {
+                    if (exception != null) {
+                        logger.error("offsets {} is not completed, error:{}", offsets, exception.getMessage());
+                    }
+                });
+            }
+        }catch(WakeupException e) {
+            logger.error("wakeup exception has been called");
+        }catch(Exception e) {
+            logger.error(e.getMessage());
+        }finally {
+            logger.info("##### commit sync before closing");
+            kafkaConsumer.commitSync();
+            logger.info("finally consumer is closing");
+            close();
+        }
+    }
+
+    protected void pollCommitSync(long durationMillis) {
+        try {
+            while (true) {
+                ConsumerRecords<K, V> consumerRecords = this.kafkaConsumer.poll(Duration.ofMillis(durationMillis));
+                processRecords(consumerRecords);
+                try {
+                    if (consumerRecords.count() > 0) {
+                        this.kafkaConsumer.commitSync();
+                        logger.info("commit sync has been called");
+                    }
+                } catch (CommitFailedException e) {
+                    logger.error(e.getMessage());
                 }
             }
         }catch(WakeupException e) {
@@ -96,56 +168,35 @@ public class OrderSerdeConsumer<String extends Serializable, OrderModel extends 
             logger.info("##### commit sync before closing");
             kafkaConsumer.commitSync();
             logger.info("finally consumer is closing");
-            closeConsumer();
+            close();
         }
     }
-
-    private void pollCommitAsync(long durationMillis) throws WakeupException, Exception {
-        ConsumerRecords<String, OrderModel> consumerRecords = this.kafkaConsumer.poll(Duration.ofMillis(durationMillis));
-        processRecords(consumerRecords);
-        this.kafkaConsumer.commitAsync( (offsets, exception) -> {
-            if(exception != null) {
-                logger.error("offsets {} is not completed, error:{}", offsets, exception.getMessage());
-            }
-
-        });
-
-    }
-    private void pollCommitSync(long durationMillis) throws WakeupException, Exception {
-        ConsumerRecords<String, OrderModel> consumerRecords = this.kafkaConsumer.poll(Duration.ofMillis(durationMillis));
-        processRecords(consumerRecords);
-        try {
-            if(consumerRecords.count() > 0 ) {
-                this.kafkaConsumer.commitSync();
-                logger.info("commit sync has been called");
-            }
-        } catch(CommitFailedException e) {
-            logger.error(e.getMessage());
-        }
-    }
-    public void closeConsumer() {
+    protected void close() {
         this.kafkaConsumer.close();
+        this.orderDBHandler.close();
     }
 
-    public static void main(java.lang.String[] args) {
-        java.lang.String topicName = "topic-to-goldi";
+    public static void main(String[] args) {
+        String topicName = "topic-to-goldi";
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.73:9092");
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, OrderDeserializer.class.getName());
-        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "goldi-group");
+        props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "goldi-01");
         props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
 
-        OrderSerdeConsumer<java.lang.String, com.seminar.kafka.model.OrderModel> baseConsumer
-                = new OrderSerdeConsumer<java.lang.String, com.seminar.kafka.model.OrderModel>(props, List.of(topicName));
-        baseConsumer.initConsumer();
-        java.lang.String commitMode = "async";
+        String user = "sys";
+        String password = "gliese";
+        OrderDBHandler orderDBHandler = new OrderDBHandler(user, password);
 
-        baseConsumer.pollConsumes(100, commitMode);
-        baseConsumer.closeConsumer();
+        OrderSerdeConsumer<String, OrderModel> fileToDBConsumer = new
+                OrderSerdeConsumer<String, OrderModel>(props, List.of(topicName), orderDBHandler);
+        fileToDBConsumer.initConsumer();
+        String commitMode = "async";
+
+        fileToDBConsumer.pollConsumes(1000, commitMode);
 
     }
-
 
 }

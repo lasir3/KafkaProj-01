@@ -1,5 +1,7 @@
 package com.seminar.kafka.consumer;
 
+import com.seminar.kafka.model.OrderModel;
+
 import java.time.LocalDateTime;
 
 public class OrderDTO {
@@ -21,5 +23,17 @@ public class OrderDTO {
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.orderTime = orderTime;
+    }
+
+        public String toString() {
+        return "OrderDTO{" +
+                "orderId='" + orderId + '\'' +
+                ", shopId='" + shopId + '\'' +
+                ", menuName='" + menuName + '\'' +
+                ", userName='" + userName + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", address='" + address + '\'' +
+                ", orderTime=" + orderTime +
+                '}';
     }
 }

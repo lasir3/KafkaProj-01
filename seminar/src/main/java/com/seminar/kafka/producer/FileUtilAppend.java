@@ -67,7 +67,7 @@ public class FileUtilAppend {
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             PrintWriter printWriter = new PrintWriter(bufferedWriter);
 
-            for(int i=0; i < 1; i++) {
+            for(int i=0; i < 50; i++) {
                 HashMap<String, String> message = produce_msg(faker, random, orderSeq++);
                 printWriter.println(message.get("key")+"," + message.get("message"));
             }

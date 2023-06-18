@@ -21,6 +21,6 @@ public class OrderDeserializer implements Deserializer<OrderModel> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return null;
+        return orderModel;
     }
 }

@@ -23,6 +23,12 @@ public class OrderSerdeProducer {
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, OrderSerializer.class.getName());
 
+        // custom partition으로 P001에 해당하는 레코드만 Partition1에 저장.
+        props.setProperty("custom.specialKey", "P001");
+        // props.setProperty("partitioner.class", "CustomPartitioner"); or
+        props.setProperty(ProducerConfig.PARTITIONER_CLASS_CONFIG, "com.seminar.kafka.producer.CustomPartitioner");
+
+
         // KafkaProducer Object Creation
         KafkaProducer<String, OrderModel> kafkaProducer = new KafkaProducer<String, OrderModel>(props);
         // Async 방식으로 동작하도록 설정
@@ -36,6 +42,8 @@ public class OrderSerdeProducer {
         // 파일의 변화를 감지하는 Event Thread 생성
         Thread fileEventSourceThread = new Thread(fileEventSource);
         fileEventSourceThread.start();
+
+
 
         try {
             fileEventSourceThread.join();
