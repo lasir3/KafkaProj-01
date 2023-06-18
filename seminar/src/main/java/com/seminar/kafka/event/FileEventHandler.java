@@ -25,7 +25,7 @@ public class FileEventHandler implements EventHandler{
     public void onMessage(MessageEvent messageEvent) throws InterruptedException, ExecutionException {
         ProducerRecord<String, OrderModel> producerRecord = new ProducerRecord<>(this.topicName, messageEvent.key, messageEvent.value);
 
-        // Sync 일때
+        // Sync가 True 일때
         if(this.sync) {
             RecordMetadata recordMetadata = this.kafkaProducer.send(producerRecord).get();
             logger.info("\n ###### record metadata received ##### \n" +

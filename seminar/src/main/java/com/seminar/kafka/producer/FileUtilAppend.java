@@ -49,6 +49,7 @@ public class FileUtilAppend {
                 , now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.KOREAN)));
         //System.out.println(message);
         HashMap<String, String> messageMap = new HashMap<>();
+        // key 값으로 shopId 사용
         messageMap.put("key", shopId);
         messageMap.put("message", message);
 

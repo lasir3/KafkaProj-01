@@ -104,7 +104,7 @@ public class OrderSerdeConsumer<String extends Serializable, OrderModel extends 
     }
 
     public static void main(java.lang.String[] args) {
-        java.lang.String topicName = "order-serde-topic";
+        java.lang.String topicName = "topic-to-goldi";
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.56.101:9092");
