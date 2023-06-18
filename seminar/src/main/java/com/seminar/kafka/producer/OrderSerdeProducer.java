@@ -33,6 +33,7 @@ public class OrderSerdeProducer {
         EventHandler eventHandler = new FileEventHandler(kafkaProducer, topicName, sync);
         FileEventSource fileEventSource = new FileEventSource(1000, file, eventHandler);
 
+        // 파일의 변화를 감지하는 Event Thread 생성
         Thread fileEventSourceThread = new Thread(fileEventSource);
         fileEventSourceThread.start();
 
