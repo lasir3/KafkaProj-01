@@ -3,4 +3,5 @@ include 'producers'
 include 'consumers'
 include 'parctice'
 include 'practice'
+include 'seminar'
 
