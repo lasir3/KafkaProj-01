@@ -14,8 +14,6 @@ public class FileUtilAppend {
     // 피자 메뉴를 설정. getRandomValueFromList()에서 임의의 피자명을 출력하는 데 사용.
     private static final List<String> pizzaNames = List.of("Potato Pizza", "Cheese Pizza",
             "Cheese Garlic Pizza", "Super Supreme", "Peperoni");
-//    private static final List<String> pizzaNames = List.of("고구마 피자", "치즈 피자",
-//            "치즈 갈릭 피자", "슈퍼 슈프림", "페페로니 피자");
 
     // 피자 가게명을 설정. getRandomValueFromList()에서 임의의 피자 가게명을 출력하는데 사용.
     private static final List<String> pizzaShop = List.of("A001", "B001", "C001",
@@ -67,7 +65,7 @@ public class FileUtilAppend {
             FileWriter fileWriter = new FileWriter(file, true);
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             PrintWriter printWriter = new PrintWriter(bufferedWriter);
-
+            //50 라인의 주문 문자열을 HashMap 생성
             for(int i=0; i < 50; i++) {
                 HashMap<String, String> message = produce_msg(faker, random, orderSeq++);
                 printWriter.println(message.get("key")+"," + message.get("message"));
@@ -88,8 +86,8 @@ public class FileUtilAppend {
         //여러분의 절대경로 위치로 변경해 주세요.
         String filePath = "E:\\Kafka-Project\\KafkaProj-01\\seminar\\src\\main\\resources\\pizza_append.txt";
         // 100회 반복 수행.
-        for(int i=0; i<1000; i++) {
-            //50 라인의 주문 문자열을 출력
+        for(int i=0; i<100; i++) {
+            // 생성한 message를 파일에 적제.
             fileUtilAppend.writeMessage(filePath, faker, random);
             System.out.println("###### iteration:"+i+" file write is done");
             try {

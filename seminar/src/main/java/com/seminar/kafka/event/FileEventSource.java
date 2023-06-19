@@ -1,18 +1,12 @@
 package com.seminar.kafka.event;
 
 import com.seminar.kafka.model.OrderModel;
-import org.apache.kafka.common.Cluster;
-import org.apache.kafka.common.InvalidRecordException;
-import org.apache.kafka.common.PartitionInfo;
-import org.apache.kafka.common.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class FileEventSource implements Runnable /*쓰레드로 생성 가능하도록 생성*/ {
@@ -21,7 +15,6 @@ public class FileEventSource implements Runnable /*쓰레드로 생성 가능하
     private final int updateInterval;
     private final File file;
     private long filePointer = 0;
-    private String specialKeyName;
     private final EventHandler eventHandler;
 
     public FileEventSource(int updateInterval, File file, EventHandler eventHandler) {

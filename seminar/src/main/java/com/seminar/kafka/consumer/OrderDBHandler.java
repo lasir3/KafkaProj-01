@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import sunje.goldilocks.jdbc.GoldilocksDriver;
@@ -91,7 +90,6 @@ public class OrderDBHandler {
             }
         }
     }
-
 
     public void close()
     {

@@ -1,7 +1,5 @@
 package com.seminar.kafka.consumer;
 
-import com.seminar.kafka.model.OrderModel;
-
 import java.time.LocalDateTime;
 
 public class OrderDTO {

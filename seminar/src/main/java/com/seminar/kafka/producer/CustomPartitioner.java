@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class CustomPartitioner implements Partitioner {
     public static final Logger logger = LoggerFactory.getLogger(CustomPartitioner.class.getName());
-    private final StickyPartitionCache stickyPartitionCache = new StickyPartitionCache();
+    // private final StickyPartitionCache stickyPartitionCache = new StickyPartitionCache();
     private String specialKeyName;
     @Override
     public void configure(Map<String, ?> configs) {
