@@ -21,6 +21,7 @@ public class FileUtilAppend {
     private static final List<String> pizzaShop = List.of("A001", "B001", "C001",
             "D001", "E001", "F001", "G001", "H001", "I001", "J001", "K001", "L001", "M001", "N001",
             "O001", "P001", "Q001");
+    // private static final List<String> pizzaShop = List.of("P001");
 
     private static int orderSeq = 5000;
     public FileUtilAppend() {}

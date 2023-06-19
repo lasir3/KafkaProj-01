@@ -63,7 +63,7 @@ public class OrderSerdeConsumer<K extends Serializable, V extends Serializable> 
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode rootNode = objectMapper.readValue(messageValue, ObjectNode.class);
 
-        // JSONArray 형식으로 저장된 orderTime을 LocalDateTime 객체로 변환
+        // JSON Array 형식으로 저장된 orderTime을 LocalDateTime 객체로 변환
         int[] orderTimeArray = objectMapper.convertValue(rootNode.get("orderTime"), int[].class);
         LocalDateTime orderTime;
         if (orderTimeArray.length == 6) {
@@ -180,7 +180,7 @@ public class OrderSerdeConsumer<K extends Serializable, V extends Serializable> 
         String topicName = "topic-to-goldi";
 
         Properties props = new Properties();
-        props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.73:9092");
+        props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.0.73:9092, 192.168.0.73:9093");
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "goldi-01");
