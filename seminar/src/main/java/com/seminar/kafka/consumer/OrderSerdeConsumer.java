@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -51,10 +50,10 @@ public class OrderSerdeConsumer<K extends Serializable, V extends Serializable> 
 
     }
 
-    private void processRecord(ConsumerRecord<K, V> record) throws Exception {
-        OrderDTO orderDTO = makeOrderDTO(record);
-        orderDBHandler.insertOrder(orderDTO);
-    }
+    // private void processRecord(ConsumerRecord<K, V> record) throws Exception {
+    //     OrderDTO orderDTO = makeOrderDTO(record);
+    //     orderDBHandler.insertOrder(orderDTO);
+    // }
 
     private OrderDTO makeOrderDTO(ConsumerRecord<K,V> record) throws Exception {
         String messageValue = (String)record.value();
