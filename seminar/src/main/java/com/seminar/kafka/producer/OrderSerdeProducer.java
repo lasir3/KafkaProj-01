@@ -43,6 +43,8 @@ public class OrderSerdeProducer {
         Thread fileEventSourceThread = new Thread(fileEventSource);
         fileEventSourceThread.start();
 
+
+
         try {
             fileEventSourceThread.join();
         } catch (InterruptedException e) {
