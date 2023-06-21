@@ -10,64 +10,79 @@ public class OrderModel implements Serializable {
     public String menuName;
     public String userName;
     public String phoneNumber;
-    public String address;
-    public LocalDateTime orderTime;
 
-    public OrderModel(String orderId, String shopId, String menuName, String userName,
-                      String phoneNumber, String address, LocalDateTime orderTime) {
-        this.orderId = orderId;
-        this.shopId = shopId;
-        this.menuName = menuName;
-        this.userName = userName;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-        this.orderTime = orderTime;
-    }
-    public OrderModel() {
-
-    }
     public String getOrderId() {
-        return orderId;
+        return this.orderId;
     }
+
     public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
+
     public String getShopId() {
-        return shopId;
+        return this.shopId;
     }
+
     public void setShopId(String shopId) {
         this.shopId = shopId;
     }
+
     public String getMenuName() {
-        return menuName;
+        return this.menuName;
     }
+
     public void setMenuName(String menuName) {
         this.menuName = menuName;
     }
+
     public String getUserName() {
-        return userName;
+        return this.userName;
     }
+
     public void setUserName(String userName) {
         this.userName = userName;
     }
+
     public String getPhoneNumber() {
-        return phoneNumber;
+        return this.phoneNumber;
     }
+
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
     public String getAddress() {
-        return address;
+        return this.address;
     }
+
     public void setAddress(String address) {
         this.address = address;
     }
+
     public LocalDateTime getOrderTime() {
-        return orderTime;
+        return this.orderTime;
     }
+
     public void setOrderTime(LocalDateTime orderTime) {
         this.orderTime = orderTime;
     }
+    public String address;
+
+    public OrderModel(String orderId, String shopId, String menuName, String userName, String phoneNumber, String address, LocalDateTime orderTime) {
+        this.orderId = orderId;
+        this.shopId = shopId;
+        this.menuName = menuName;
+        this.userName = userName;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.orderTime = orderTime;
+    }
+    public LocalDateTime orderTime;
+
+    public OrderModel() {
+
+    }
+    
 
     // Log 확인
     @Override

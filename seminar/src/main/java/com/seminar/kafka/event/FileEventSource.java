@@ -50,14 +50,15 @@ public class FileEventSource implements Runnable /*쓰레드로 생성 가능하
     }
 
     private void readAppendAndSend() throws IOException, ExecutionException, InterruptedException {
-        RandomAccessFile raf = new RandomAccessFile(this.file, "r");
-        raf.seek(this.filePointer);
-        String line = null;
-        while((line = raf.readLine()) != null) {
-            sendMessage(line);
+        try (RandomAccessFile raf = new RandomAccessFile(this.file, "r")) {
+            raf.seek(this.filePointer);
+            String line = null;
+            while((line = raf.readLine()) != null) {
+                sendMessage(line);
+            }
+            // file이 변경되었으므로 file의 filePointer를 현재 file의 마지막으로 재설정함.
+            this.filePointer = raf.getFilePointer();
         }
-        // file이 변경되었으므로 file의 filePointer를 현재 file의 마지막으로 재설정함.
-        this.filePointer = raf.getFilePointer();
     }
     private void sendMessage(String line) throws ExecutionException, InterruptedException {
         final String delimiter = ",";
@@ -69,6 +70,4 @@ public class FileEventSource implements Runnable /*쓰레드로 생성 가능하
         MessageEvent messageEvent = new MessageEvent(key, orderModel);
         this.eventHandler.onMessage(messageEvent);
     }
-
-
 }

@@ -1,7 +1,6 @@
 package com.seminar.kafka.producer;
 
 import org.apache.kafka.clients.producer.Partitioner;
-import org.apache.kafka.clients.producer.internals.StickyPartitionCache;
 import org.apache.kafka.common.Cluster;
 import org.apache.kafka.common.InvalidRecordException;
 import org.apache.kafka.common.PartitionInfo;

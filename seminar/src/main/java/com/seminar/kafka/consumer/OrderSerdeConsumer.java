@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -50,11 +49,11 @@ public class OrderSerdeConsumer<K extends Serializable, V extends Serializable> 
         });
 
     }
-
-    private void processRecord(ConsumerRecord<K, V> record) throws Exception {
-        OrderDTO orderDTO = makeOrderDTO(record);
-        orderDBHandler.insertOrder(orderDTO);
-    }
+    // 미사용
+    // private void processRecord(ConsumerRecord<K, V> record) throws Exception {
+        // OrderDTO orderDTO = makeOrderDTO(record);
+        // orderDBHandler.insertOrder(orderDTO);
+    // }
 
     private OrderDTO makeOrderDTO(ConsumerRecord<K,V> record) throws Exception {
         String messageValue = (String)record.value();
@@ -122,11 +121,7 @@ public class OrderSerdeConsumer<K extends Serializable, V extends Serializable> 
                         logger.error(e.getMessage());
                     }
                 }
-//                if(consumerRecords.count() > 0) {
-//                    for (ConsumerRecord<K, V> consumerRecord : consumerRecords) {
-//                        processRecord(consumerRecord);
-//                    }
-//                }
+
                 //commitAsync의 OffsetCommitCallback을 lambda 형식으로 변경
                 this.kafkaConsumer.commitAsync((offsets, exception) -> {
                     if (exception != null) {
