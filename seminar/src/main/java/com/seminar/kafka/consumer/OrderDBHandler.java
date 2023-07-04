@@ -14,7 +14,7 @@ public class OrderDBHandler {
     public static final Logger logger = LoggerFactory.getLogger(OrderDBHandler.class.getName());
     private Connection connection = null;
     private PreparedStatement insertPrepared = null;
-    private static final String INSERT_ORDER_SQL = "INSERT INTO PUBLIC.ORDERS_HASH values (?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_ORDER_SQL = "INSERT INTO PUBLIC.ORDERS values (?, ?, ?, ?, ?, ?, ?)";
 
     public OrderDBHandler(String user, String password) {
         try {

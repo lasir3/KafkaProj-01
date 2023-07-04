@@ -43,7 +43,7 @@ public class FileUtilAppend {
         String phoneNumber = faker.phoneNumber().phoneNumber();
         String address = faker.address().streetAddress();
         LocalDateTime now = LocalDateTime.now();
-        String message = String.format("%s, %s, %s, %s, %s, %s, %s"
+        String message = String.format("%s,%s,%s,%s,%s,%s,%s"
                 , ordId, shopId, pizzaName, customerName, phoneNumber, address
                 , now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.KOREAN)));
         //System.out.println(message);
